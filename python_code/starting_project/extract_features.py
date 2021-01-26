@@ -28,16 +28,22 @@ class Extraction:
         normalized_differences = self.__normalized_differences(differences=differences)
 
         res = self.__sdrr(differences=differences)
-        print(f"SDRR is {res} msec.")
+        print(f"SDRR is {round(res, 2)} msec.")
         res2 = self.__average_heart_rate(differences=differences)
-        print(f"Average heart rate is {res2} bpm.")
+        print(f"Average heart rate is {round(res2, 1)} bpm.")
         res3 = self.__sdnn(normalized_differences=normalized_differences)
-        print(f"SDNN is {res3} msec.")
+        print(f"SDNN is {round(res3, 2)} msec.")
         res45 = self.__sdann__and_sdnni(data_series=self.data[0])
         res4 = res45["sdann"]
         res5 = res45["sdnni"]
-        print(f"SDANN is {res4} msec.")
-        print(f"SDNNI is {res5} msec.")
+        print(f"SDANN is {round(res4, 2)} msec.")
+        print(f"SDNNI is {round(res5, 2)} msec.")
+        res6 = self.__pnn50(normalized_differences=normalized_differences)
+        print(f"pNN50 percentage is {round(res6*100,1)}%")
+        res7 = self.__rmssd(normalized_differences=normalized_differences)
+        print(f"RMSSD is {round(res7, 2)} msec.")
+        res8 = self.__hrmaxmin(differences=differences)
+        print(f"HR max - HR min is {round(res8, 1)} bpm.")
 
     def extract_ultra_short_features(self):
         """The method for extracting ECG features in an ultra short window."""
@@ -126,6 +132,47 @@ class Extraction:
         else:
             return 0
     #     we've got error here
+
+    def __pnn50(self, normalized_differences: list) -> float:
+        """Returns the percentage of adjacent NN intervals that differ from each other by more than 50 ms"""
+        count = 0
+        margin = 50 * self.fs / 1000
+        for i in range(0, len(normalized_differences) - 1):
+            if abs(normalized_differences[i] - normalized_differences[i + 1]) > margin:
+                count += 1
+        sz = len(normalized_differences)
+        if sz > 1:
+            return count / (sz - 1)
+        else:
+            return 0
+
+    def __rmssd(self, normalized_differences):
+        """Returns RMSSD metric, by using nn intervals (computed in milliseconds)."""
+        sum = 0
+        normalized_differences_sec = []
+        for diff in normalized_differences:
+            normalized_differences_sec.append(diff / self.fs)
+        for i in range(0, len(normalized_differences_sec) - 1):
+            sum += (normalized_differences_sec[i + 1] - normalized_differences_sec[i]) ** 2
+        sz = len(normalized_differences_sec)
+        if sz > 1:
+            return math.sqrt(sum / (sz - 1)) * 1000
+        else:
+            return 0
+
+    def __hrmaxmin(self, differences):
+        """Returns the difference between the max and min heartbeat, in beats per minute."""
+        min_diff = 100000
+        max_diff = 0
+        for i in range(0, len(differences)):
+            if differences[i] > max_diff:
+                max_diff = differences[i]
+            if differences[i] < min_diff:
+                min_diff = differences[i]
+        max = 60/(max_diff/self.fs)
+        min = 60/(min_diff/self.fs)
+        return min - max
+
 
     def __extract_ultra_short(self, data_series: pd.core.series.Series) -> list:
         """Returns ultra short series from a short series"""
