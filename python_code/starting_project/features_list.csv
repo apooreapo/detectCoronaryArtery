@@ -1,0 +1,27 @@
+,Names,Units,Approximate calculation times
+0,SDRR,msec,0.00069
+1,Average Heart Rate,bpm,0.00032
+2,SDNN,msec,0.00062
+3,SDSD,msec,0.00128
+4,SDANN,msec,0.13853
+5,SDNNI,msec,0.13853
+6,pNN50,NaN,0.00052
+7,RMSSD,msec,0.00073
+8,HTI,NaN,0.00016
+9,HR max - HR min,bpm,4e-05
+10,VLF Energy,NaN,0.00559
+11,VLF Energy Percentage,NaN,0.00559
+12,LF Energy,NaN,0.00559
+13,LF Energy Percentage,NaN,0.00559
+14,HF Energy,NaN,0.00559
+15,HF Energy Percentage,NaN,0.00559
+16,Poincare sd1,msec,0.0468
+17,Poincare sd2,msec,0.0468
+18,Poincare ratio,NaN,0.0468
+19,Poincare Ellipsis Area,msec^2,0.0468
+20,Mean Approximate Entropy,NaN,0.7407
+21,Approximate Entropy std,NaN,0.7407
+22,Mean Sample Entropy,NaN,1.3102
+23,Sample Entropy std,NaN,1.3102
+24,Short-term Fluctuation,NaN,0.07168
+25,Long-term Fluctuation,NaN,0.07168
