@@ -15,6 +15,28 @@ ULTRA_SHORT_TIME_WINDOW = 30  # half minute
 SHORT_TIME_WINDOW = 300  # 5 minutes
 
 
+class Queue:
+    """A class implementic a queue. Methods: insert."""
+    def __init__(self, size):
+        self.size = size
+        self.data = []
+
+    def insert_element(self, element):
+        data_size = len(self.data)
+        if data_size == 0:
+            self.data.append(element)
+        elif data_size < self.size:
+            self.data.append(self.data[-1])
+            for i in range(len(self.data) - 2, 0, -1):
+                self.data[i] = self.data[i-1]
+            self.data[0] = element
+
+        else:
+            for i in range(data_size - 1, 0, -1):
+                self.data[i] = self.data[i - 1]
+            self.data[0] = element
+
+
 class Extraction:
     """A class for extracting features from ecg. Initialized with file title."""
     def __init__(self, file: str):
@@ -30,20 +52,20 @@ class Extraction:
 
         # Construct the features_list.csv with the extracted features characteristics.
 
-        features_list_dir = []
+        # features_list_dir = []
         names = ["SDRR", "Average Heart Rate", "SDNN", "SDSD", "SDANN", "SDNNI", "pNN50", "RMSSD", "HTI",
                  "HR max - HR min", "VLF Energy", "VLF Energy Percentage", "LF Energy", "LF Energy Percentage",
                  "HF Energy", "HF Energy Percentage", "Poincare sd1", "Poincare sd2", "Poincare ratio",
                  "Poincare Ellipsis Area", "Mean Approximate Entropy", "Approximate Entropy std",
                  "Mean Sample Entropy", "Sample Entropy std", "Short-term Fluctuation", "Long-term Fluctuation"]
-        units = ["msec", "bpm", "msec", "msec", "msec", "msec", "NaN", "msec", "NaN", "bpm", "NaN", "NaN", "NaN",
-                 "NaN", "NaN", "NaN", "msec", "msec", "NaN", "msec^2", "NaN", "NaN", "NaN", "NaN", "NaN", "NaN"]
-        calculation_times_app = [0.00069, 0.00032, 0.00062, 0.00128, 0.13853, 0.13853, 0.00052, 0.00073,
-                                 0.00016, 0.00004, 0.00559, 0.00559, 0.00559, 0.00559, 0.00559, 0.00559,
-                                 0.04680, 0.04680, 0.04680, 0.04680, 0.74070, 0.74070, 1.31020, 1.31020,
-                                 0.07168, 0.07168]
-        feature_dict = {"Names": names, "Units": units, "Approximate calculation times": calculation_times_app}
-        df = pd.DataFrame(data=feature_dict)
+        # units = ["msec", "bpm", "msec", "msec", "msec", "msec", "NaN", "msec", "NaN", "bpm", "NaN", "NaN", "NaN",
+        #          "NaN", "NaN", "NaN", "msec", "msec", "NaN", "msec^2", "NaN", "NaN", "NaN", "NaN", "NaN", "NaN"]
+        # calculation_times_app = [0.00069, 0.00032, 0.00062, 0.00128, 0.13853, 0.13853, 0.00052, 0.00073,
+        #                          0.00016, 0.00004, 0.00559, 0.00559, 0.00559, 0.00559, 0.00559, 0.00559,
+        #                          0.04680, 0.04680, 0.04680, 0.04680, 0.74070, 0.74070, 1.31020, 1.31020,
+        #                          0.07168, 0.07168]
+        # feature_dict = {"Names": names, "Units": units, "Approximate calculation times": calculation_times_app}
+        # df = pd.DataFrame(data=feature_dict)
         # print(df)
         # df.to_csv(path_or_buf="./features_list.csv")
 
@@ -57,7 +79,7 @@ class Extraction:
         for name in column_titles:
             res_dict[name] = []
 
-        for index in range(0, 3):
+        for index in range(0, 5):
             current_data = self.data[index]
             r_peaks = PeaksDetection(fs=self.fs, data_series=current_data).detect_peaks()
             differences = []
@@ -136,7 +158,7 @@ class Extraction:
             # time_durations.append(toc - tic)
 
             # tic = time.perf_counter()
-            res8 = self.__hrmaxmin(differences=differences)
+            res8 = self.__hrmaxmin(normalized_differences=normalized_differences)
             res_dict[column_titles[9]].append(res8)
             if print_message:
                 print(f"HR max - HR min is {round(res8, 1)} bpm.")
@@ -229,7 +251,7 @@ class Extraction:
         differences = []
         for i in range(1, len(r_peaks)):
             differences.append(r_peaks[i] - r_peaks[i - 1])
-        norm = self.__sdrr(differences=differences)
+        # norm = self.__sdrr(differences=differences)
         # print(f"SDRR is {res} msec.")
         res2 = self.__average_heart_rate(differences=differences)
         print(f"Average heart rate is {res2} bpm.")
@@ -242,7 +264,7 @@ class Extraction:
         """Returns the average duration of a beat in milliseconds."""
         return statistics.mean(differences)/self.fs*1000
 
-    def __sdann__and_sdnni(self, data_series: pd.core.series.Series) -> tuple:
+    def __sdann__and_sdnni(self, data_series) -> tuple:
         """Returns the standard deviation of the average nn duration of 30s intervals, in milliseconds, and
         the mean of the standard deviation of nn duration of 30s intervals, in milliseconds.
         Dictionary keys are 'sdann' and 'sdnni'."""
@@ -259,45 +281,62 @@ class Extraction:
             nn_std.append(statistics.stdev(normalized_differences))
         return statistics.stdev(average_nn), statistics.mean(nn_std)/self.fs*1000
 
-
     def __normalized_differences(self, differences: list) -> list:
         """Returns the time duration of heartbeats, excluding abnormal beats."""
         # step = 1000 / self.fs
-        margin = 150 * self.fs / 1000  # maximum margin is 150 msec
-        to_be_removed = []
-        to_be_removed_indices = []
+        # margin = 150 * self.fs / 1000  # maximum margin is 150 msec
+        # to_be_removed = []
+        # to_be_removed_indices = []
+        # for i in range(0, len(differences)):
+        #     to_be_removed.append(False)
+        # for i in range(0, len(differences) - 1):
+        #     if not to_be_removed[i]:
+        #         for j in [i + 1, i + 2]:
+        #             if 0 <= j < len(differences):
+        #                 if not to_be_removed[j]:
+        #                     if abs(differences[i] - differences[j]) > margin:
+        #                         temp_sum_i = 0
+        #                         temp_count_i = 0
+        #                         temp_sum_j = 0
+        #                         temp_count_j = 0
+        #                         for k in range(i - 2, i + 2):
+        #                             if 0 <= k < len(differences):
+        #                                 if not to_be_removed[k]:
+        #                                     temp_sum_i += abs(differences[i]-differences[k])
+        #                                     temp_count_i += 1
+        #                         for k in range(j - 2, j + 2):
+        #                             if 0 <= k < len(differences):
+        #                                 if not to_be_removed[k]:
+        #                                     temp_sum_j += abs(differences[j]-differences[k])
+        #                                     temp_count_j += 1
+        #                         if temp_sum_i / temp_count_i > temp_sum_j / temp_count_j:
+        #                             to_be_removed[i] = True
+        #                             to_be_removed_indices.append(i)
+        #                         else:
+        #                             to_be_removed[j] = True
+        #                             to_be_removed_indices.append(j)
+        # for i in range(len(differences)-1, -1, -1):
+        #     if to_be_removed[i]:
+        #         del differences[i]
+        # return differences
+        normalized_differences = []
+        comparison_queue = Queue(size=4)
+        count = 0
+        while len(comparison_queue.data) < 4 and count + 7 < len(differences):
+
+            moving_mean_dif = statistics.mean(differences[count: count + 7])
+            if 0.75 * moving_mean_dif <= differences[count] <= 1.25 * moving_mean_dif:
+                comparison_queue.insert_element(differences[count])
+            count += 1
+
         for i in range(0, len(differences)):
-            to_be_removed.append(False)
-        for i in range(0, len(differences) - 1):
-            if not to_be_removed[i]:
-                for j in [i + 1, i + 2]:
-                    if 0 <= j < len(differences):
-                        if not to_be_removed[j]:
-                            if abs(differences[i] - differences[j]) > margin:
-                                temp_sum_i = 0
-                                temp_count_i = 0
-                                temp_sum_j = 0
-                                temp_count_j = 0
-                                for k in range(i - 2, i + 2):
-                                    if 0 <= k < len(differences):
-                                        if not to_be_removed[k]:
-                                            temp_sum_i += abs(differences[i]-differences[k])
-                                            temp_count_i += 1
-                                for k in range(j - 2, j + 2):
-                                    if 0 <= k < len(differences):
-                                        if not to_be_removed[k]:
-                                            temp_sum_j += abs(differences[j]-differences[k])
-                                            temp_count_j += 1
-                                if temp_sum_i / temp_count_i > temp_sum_j / temp_count_j:
-                                    to_be_removed[i] = True
-                                    to_be_removed_indices.append(i)
-                                else:
-                                    to_be_removed[j] = True
-                                    to_be_removed_indices.append(j)
-        for i in range(len(differences)-1, -1, -1):
-            if to_be_removed[i]:
-                del differences[i]
-        return differences
+            moving_mean = statistics.mean(comparison_queue.data)
+            if 0.85 * moving_mean <= differences[i] <= 1.15 * moving_mean:
+                normalized_differences.append(differences[i])
+                comparison_queue.insert_element(differences[i])
+            elif 0.75 * moving_mean <= differences[i] <= 1.25 * moving_mean:
+                comparison_queue.insert_element(differences[i])
+        return normalized_differences
 
     def __sdnn(self, normalized_differences: list) -> float:
         """Returns the standard deviation of all normal sinus beats in milliseconds"""
@@ -325,43 +364,41 @@ class Extraction:
             return 0
 
     def __sdsd(self, normalized_differences: list) -> float:
-        """Returns the standard deviation of succesive differences of beats in milliseconds"""
+        """Returns the standard deviation of successive differences of beats in milliseconds"""
         diff = []
         for i in range(0, len(normalized_differences) - 1):
             diff.append(abs(normalized_differences[i] - normalized_differences[i + 1]))
         diff = diff / self.fs * 1000
         return statistics.stdev(diff)
 
-
     def __rmssd(self, normalized_differences):
         """Returns RMSSD metric, by using nn intervals (computed in milliseconds)."""
-        sum = 0
+        temp_sum = 0
         normalized_differences_sec = []
         for diff in normalized_differences:
             normalized_differences_sec.append(diff / self.fs)
         for i in range(0, len(normalized_differences_sec) - 1):
-            sum += (normalized_differences_sec[i + 1] - normalized_differences_sec[i]) ** 2
+            temp_sum += (normalized_differences_sec[i + 1] - normalized_differences_sec[i]) ** 2
         sz = len(normalized_differences_sec)
         if sz > 1:
-            return math.sqrt(sum / (sz - 1)) * 1000
+            return math.sqrt(temp_sum / (sz - 1)) * 1000
         else:
             return 0
 
-    def __hrmaxmin(self, differences):
+    def __hrmaxmin(self, normalized_differences):
         """Returns the difference between the max and min heartbeat, in beats per minute."""
         min_diff = 100000
         max_diff = 0
-        for i in range(0, len(differences)):
-            if differences[i] > max_diff:
-                max_diff = differences[i]
-            if differences[i] < min_diff:
-                min_diff = differences[i]
-        max = 60/(max_diff/self.fs)
-        min = 60/(min_diff/self.fs)
-        return min - max
+        for i in range(0, len(normalized_differences)):
+            if normalized_differences[i] > max_diff:
+                max_diff = normalized_differences[i]
+            if normalized_differences[i] < min_diff:
+                min_diff = normalized_differences[i]
+        max_temp = 60/(max_diff/self.fs)
+        min_temp = 60/(min_diff/self.fs)
+        return min_temp - max_temp
 
-
-    def __extract_ultra_short(self, data_series: pd.core.series.Series) -> list:
+    def __extract_ultra_short(self, data_series) -> list:
         """Returns ultra short series from a short series"""
         result = []
         step = math.ceil(self.fs * ULTRA_SHORT_TIME_WINDOW)
@@ -374,19 +411,19 @@ class Extraction:
         """Calculates and returns Heart Rate Variability Triangular Index.
         We separate the ECG in 8 msec parts, and create the following histogram of nn duration (in 8 msec pieces).
         HTI is equal to the height of the max histogram bar, divided by the count of intervals (i.e. beats)."""
-        def count_elements(seq, step) -> dict:
+        def count_elements(seq, st) -> dict:
             """Tally elements from `seq`."""
-            hist = {}
+            histo = {}
             for i in seq:
-                ind = int(i / step)
-                hist[ind] = hist.get(int(ind), 0) + 1
-            return hist
+                ind = int(i / st)
+                histo[ind] = histo.get(int(ind), 0) + 1
+            return histo
 
         if self.fs <= 125:
             step = 1
         else:
             step = int(8 / (1000 / self.fs))
-        hist = count_elements(seq=normalized_differences, step=step)
+        hist = count_elements(seq=normalized_differences, st=step)
         hist_list = list(hist)
         temp_max = 0
         for val in hist_list:
@@ -433,19 +470,19 @@ class Extraction:
 
         def sampen(data, m, r1):
             n = len(data)
-            b = 0.0
-            a = 0.0
+            # b = 0.0
+            # a = 0.0
 
             # Split time series and save all templates of length m
-            xmi = np.array([data[i: i + m] for i in range(n - m)])
-            xmj = np.array([data[i: i + m] for i in range(n - m + 1)])
+            xmi = np.array([data[ii: ii + m] for ii in range(n - m)])
+            xmj = np.array([data[ii: ii + m] for ii in range(n - m + 1)])
 
             # Save all matches minus the self-match, compute B
             b = np.sum([np.sum(np.abs(xmii - xmj).max(axis=1) <= r1) - 1 for xmii in xmi])
 
             # Similar for computing A
             m += 1
-            xm = np.array([data[i: i + m] for i in range(n - m + 1)])
+            xm = np.array([data[ii: ii + m] for ii in range(n - m + 1)])
 
             a = np.sum([np.sum(np.abs(xmi - xm).max(axis=1) <= r1) - 1 for xmi in xm])
 
@@ -462,5 +499,3 @@ class Extraction:
         mn = statistics.mean(sample_entropy)
         sd = statistics.stdev(sample_entropy)
         return mn, sd
-
-
