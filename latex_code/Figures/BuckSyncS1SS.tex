@@ -1,0 +1,26 @@
+\begin{circuitikz}[american voltages]
+
+\draw 
+ node[coordinate](vplus) at (0,3) {}
+ node[coordinate](vminus) at (0,-1) {}
+;
+
+
+\draw 
+    (vplus) to[american voltage source,v_=$V_i$] (vminus) 
+    (vplus) to (1,3) to[R,-] (3,3) to (3.1,3) to[american current source,-,v_>=$v_L(t)$] (4.9,3) to[short,-] (5,3) to (5.4,3) to[R,-] (6.6,3) to[short,-*] (7.4,3) to[R,-,i^>=$i_C(t)$] (7.4,1) to[american voltage source,-,v^>=$V_C$] (7.4,-1)
+    (7.4,3) to[short,i^>=$i_o(t)$] (9.4,3) to[R,v^>=$v_o(t)$] (9.4,-1) to[short,-*] (7.4,-1) to[short,-] (0,-1)
+    
+;
+
+
+\draw 
+
+
+    node(Lind) at (4,3.7){$I_L$}
+    node(R1) at (8.8,1.5){$R_L$}
+    node(R1) at (2,3.5){$r_L$}
+    node(R2) at (6.8,2){$r_{esr}$}
+    node(R3) at (6,3.5){$r_{on}$}
+;
+\end{circuitikz}

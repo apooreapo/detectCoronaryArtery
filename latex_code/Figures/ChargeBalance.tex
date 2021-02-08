@@ -1,0 +1,37 @@
+\begin{circuitikz}[american voltages]
+
+\draw 
+(5,2.5) node[spdt, rotate=180] (Sw) {}
+(Sw.out 1) node[above] {0}
+(Sw.out 2) node[above] {1}
+
+(0,2.5) node[spdt, rotate=0] (Sw2) {}
+(Sw2.out 1) node[above] {0}
+(Sw2.out 2) node[above] {1}
+
+ node[coordinate](vplus1) at (2,2) {}
+ node[coordinate](vminus1) at (2,0) {}
+ node[coordinate](vplus2) at (4,2) {}
+ node[coordinate](vminus2) at (4,0) {}
+;
+
+\draw 
+    (vminus1) to[american current source,i_=$i_1(t)$] (vplus1) 
+    (vplus1) |- (Sw.out 2)
+    (vminus2) to[american current source,i_=$i_0(t)$] (vplus2)
+    (vplus2) |- (Sw.out 1) 
+    (Sw.in) to (6,2.5) to[C,-,i^>=$i_C(t)$,v_>=$v_C(t)$] (8.4,2.5) to (8.4,0)
+    to[short,-*] (vminus2) to[short,-*] (vminus1)
+    
+    (Sw2.out 1) to[short,-*] (2,2.82)
+    (Sw2.out 2) to[short,-*] (4,2.18)
+    (Sw2.in) |- (vminus1)
+;
+
+
+\draw 
+
+
+    node(Lind) at (7.2,3.2){$C$}
+;
+\end{circuitikz}

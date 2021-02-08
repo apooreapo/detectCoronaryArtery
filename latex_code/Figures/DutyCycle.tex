@@ -1,0 +1,30 @@
+\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1.0cm,y=1.0cm]
+\begin{axis}[
+  axis x line=center,
+  axis y line=center,
+  ymax=3,
+  xtick={1.8,4},
+  ytick=\empty,
+  xticklabels={$DT_s$,$T_s$},
+  xlabel=$t$,
+  ylabel=$d(t)$,
+  xlabel style={below right},
+  ylabel style={below left},
+    every axis plot/.append style={thick}
+]
+\addplot [mark=none, color=black] table {
+0 0
+0 2
+1.8 2
+1.8 0
+4 0
+4 2
+5.8 2
+5.8 0
+6.5 0
+};
+\end{axis}
+;
+\node at (1,2){State 1};
+\node at (3.1,2){State 0};
+\end{tikzpicture}

@@ -1,0 +1,170 @@
+\documentclass[a4paper]{article}
+\usepackage{tikz, pgfplots}
+\usepgfplotslibrary{groupplots,units}
+\pgfplotsset{compat=1.15}
+\usepackage{float}
+\usepackage{lscape}
+\usepackage{array}
+\usepackage[nottoc,numbib]{tocbibind}
+%\addcontentsline{toc}{section}{References}
+\usepackage{multirow}
+\usepackage{tikz}
+\usepackage{cite}
+\usepackage{circuitikz}
+\usepackage{mathtools}
+\usepackage{mleftright}
+\usepackage{physics}
+\usetikzlibrary{shapes.geometric, arrows}
+\usepackage{url}
+% \usepackage[hidelinks]{hyperref}
+% \usepackage[utf8]{inputenc}
+% \usepackage[T1]{fontenc}
+% \usepackage[english]{babel}
+% \usepackage{alphabeta}
+\usepackage{fancyhdr} % Required for custom headers
+\usepackage{lastpage} % Required to determine the last page for the footer
+\usepackage{extramarks} % Required for headers and footers
+% \usepackage{graphicx} % Required to insert images
+% \usepackage{amsmath,amssymb,amsthm,amsfonts}
+% \usepackage{cleveref}
+% \usepackage{commath}
+% \usepackage{caption}
+% \usepackage{subcaption}
+% \setlength{\parindent}{4em}
+% \setlength{\parskip}{1em}
+% \usepackage{listings}
+% \usepackage{bm}
+% \usepackage{gensymb}
+% \usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+
+% \usepackage[iso-8859-7]{inputenc}
+\usepackage{gfsdidot}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english,greek]{babel}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage[parfill]{parskip}
+\usepackage[unicode]{hyperref}
+% \usepackage{kmath,kerkis}
+% \def\tl{\textlatin}
+% \def\tg{\textgreek}
+% \usepackage{helvet}
+% \renewcommand{\familydefault}{\sfdefault}
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+
+\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, text width=2.5cm, draw=black, fill=blue!30]
+
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=1cm, text centered, text width=4cm, draw=black, fill=orange!30]
+
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+\tikzstyle{arrow2} = [thick,-,>=stealth]
+
+\tikzstyle{output} = [coordinate]
+% Margins
+\topmargin=-0.45in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.3in
+\textheight=9.6in
+\headsep=0.25in
+
+%\linespread{1.1} % Line spacing
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs
+
+%\setcounter{secnumdepth}{0} % Removes default section numbers
+
+% Set up the header and footer
+
+
+\renewcommand\headrulewidth{0.4pt} % Size of the header rule
+%\renewcommand\footrulewidth{0.4pt} % Size of the footer rule
+
+
+
+%	NAME AND CLASS SECTION
+\newcommand{\hmwkTitle}{Modelling \& Design of a Prototype DC/DC Converter for Trip Coil Applications} % Assignment title
+%\newcommand{\hmwkClass}{EG2330} % Course/class
+%\newcommand{\hmwkClassName}{Power System Design Project Course} % Course/class
+
+\usepackage{fancyhdr}
+
+\pagestyle{fancy}
+%\rfoot{Page\ \thepage\ of\ \pageref{LastPage}} % Bottom right footer
+
+%\chead{Power-electronics system for grid-connected PV plants} % Top center header
+\rhead{} % Top right header
+% \cfoot{}
+%	TITLE PAGE
+
+
+\title{
+	%\includegraphics[width=2in]{kth_cmyk_electr_engine.eps}\\
+	%\vspace{1.5in}
+	%\textmd{\textbf{\hmwkClass\ -- \hmwkClassName}}\\
+	%\vspace{0.2in}
+	\textmd{\textbf{\hmwkTitle}}\\
+%	\normalsize\vspace{0.1in} \small{\today}\\
+	\vspace{2in} 
+}
+\author{
+\textbf{\Large{Orestis Apostolou}}\\
+}
+
+
+\date{February 2021}
+
+\usepackage{afterpage}
+
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage}
+    
+\begin{document}
+\afterpage{\blankpage}
+\input{titlepage}
+\pagenumbering{roman}	
+
+    
+    %\input{Abstract.tex}
+    %\newpage
+    
+    \setcounter{page}{1}
+    %\tableofcontents
+    \newpage
+\graphicspath{{Figures/}}
+\setcounter{secnumdepth}{0}
+\input{Abstract.tex}
+\clearpage
+\input{Acknowledgements.tex}
+\clearpage
+\input{Abbreviations.tex}
+\clearpage
+%\fancyhead[L]{}
+\tableofcontents
+%\addcontentsline{toc}{section}{References}
+\listoffigures
+\listoftables
+\clearpage
+\pagenumbering{arabic}
+\setcounter{secnumdepth}{3}
+\input{Introduction.tex}
+\clearpage
+%\renewcommand\headrulewidth{0pt} % Size of the header rule
+\setcounter{secnumdepth}{0}
+\fancyhead[L]{}
+\bibliographystyle{IEEEtran}
+\bibliography{Bibben.bib}
+\clearpage
+\fancyhead[L]{}
+\setcounter{secnumdepth}{3}
+\input{Appendices.tex}
+\clearpage
+
+\end{document}
