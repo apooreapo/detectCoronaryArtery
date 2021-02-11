@@ -1,0 +1,35 @@
+\begin{circuitikz}[american voltages]
+
+\draw 
+ (5,1) node[nigfete](mosL){}
+ (5,3) node[nigfete](mosH){}
+ node[coordinate](vplus) at (0,2) {}
+ node[coordinate](vminus) at (0,0) {}
+ node[coordinate](vmosD1up) at (3.5,4) {}
+ node[coordinate](vmosS2dn) at (3.5,0) {}
+ node[coordinate](Dc) at (8,4) {}
+;
+
+
+\draw 
+    (vplus) to[american voltage source,v_=$v_i(t)$] (vminus)
+    (vplus) to[R,i^>=$i_L(t)$] (3,2) to[L,-] (4,2) to[short,-*] (5,2) 
+    (mosH.S) to (5,2) to (mosL.D)    
+    (mosL.S) |- (vminus)
+    (mosH.D) |- (7,4) to[R,*-] (7,2) to[short,i^>=$i_C(t)$] (7,1.5) to[C,-*] (7,0) to[short,-*] (5,0)
+    (7,4) to[short,i^>=$i_o(t)$] (9,4) to (9,3.5) to[R,v^>=$v(t)$] (9,0.5) to (9,0) to (7,0) 
+    (2.6,2) to[open,v_>=$v_L(t)$] (4.4,2)
+    (7.2,1.25) to[open,v^>=$v_C(t)$] (7.2,0.25)
+;
+
+
+\draw 
+    node(Lind) at (3.5,2.5){$L$}
+    node(R3) at (1.5,2.5){$r_L$}
+    node(T1) at (4,3){$T_2$}
+    node(T2) at (4,1){$T_1$}
+    node(C1) at (6.3,0.75){$C$}
+    node(R1) at (6.4,3){$r_{esr}$}
+    node(R2) at (8.4,2){$R_{L}$}
+;
+\end{circuitikz}

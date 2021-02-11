@@ -1,0 +1,80 @@
+\selectlanguage{english}
+
+\section{Introduction}{\label{Intro}}
+\subsection{Background}
+
+In modern electric power systems the circuit breakers are components of critical importance, since they are used to ensure the safe and reliable operation of the network. During normal operation the breakers allow the current flow presenting very low conducting resistance. On the other hand, in a fault case they have to operate under highly accurate margins and in some cases after long periods of inactivity in order to effectively interrupt the current flow and protect expensive equipment like transformers. 
+
+There are several reasons for testing circuit breakers and among the most important ones are \cite{meggertg} 
+\begin{itemize}
+    \item to ensure that costly equipment is protected
+    \item to prevent power outages in the power network
+    \item to ensure reliable power delivery
+    \item to verify the proper operation of the breaker according to its specifications
+\end{itemize}
+
+Circuit breaker testing in substations involves performing a number of different recommended tests and among those is the minimum pick-up measurement \cite{meggercb,sweetserch}. The minimum pick-up is described both in international and national standards such as IEC 62271-100, ANSI C37.09 etc. The purpose of performing the minimum pick-up measurement is to determine the minimum voltage for which the command coil latches and the circuit breaker is operated. The command coil can be either "open" or "close" and both of them must be tested independently. It should be noted that the timing parameters of the contact are not of interest in this type of test.
+
+Circuit breaker trip coils are typically powered by batteries located in the substation and they are specified to latch at much lower voltage than the nominal voltage of the battery. The purpose of this test is therefore to ascertain that the breaker coils trip at the minimum specified voltage. Divergence in the tripping voltage level may depict sluggish operation of the protective mechanisms which shall need to be addressed by means of maintenance.
+
+The testing procedure is rather simple. Short pulses of incremental DC voltage are applied to the trip coil varying from 20\% up to 120\% of the battery's nominal voltage. The test is completed either when the coil trips or when the test voltage reaches 120\% of the battery's nominal voltage. The measurements are obtained and then it is assessed whether or not further actions are needed to be addressed. 
+
+It is evident that in order to conduct this test the minimum equipment needed is a power source (battery) and a voltage regulator (power converter) which shall yield variable DC voltage pulses as output. During each pulse the DC voltage output shall be kept within specified margins (output voltage ripple). A typical test setup is illustrated in \cref{fig:Test_setup}, including a DC power source or battery, a DC/DC power converter dedicated to regulate the DC voltage, a switch analyser and the command coils which are parts of the high voltage circuit breaker.
+
+\begin{figure}[h]
+    \centering
+    \input{Figures/Test_Setup.tex}
+    \caption{Typical setup of minimum trip voltage test.}
+    \label{fig:Test_setup}
+\end{figure}
+
+Most commonly, the product alternatives which can perform the minimum pick-up test include a module or function in physically heavier instruments powered by mains (AC), which perform a wider range of circuit breaker tests. The case study being conducted in this thesis aims at investigating the concept of designing a lighter, portable, battery-powered product to perform the minimum pick-up measurement. The presumed future product will be placed in the market as an alternative (back-up) test instrument in the cases when mains is not available in the substation.
+
+\subsection{Thesis objectives}
+
+The project can be considered as a prestudy conducted on behalf of Megger Sweden AB company. The desire of the company was to build a prototype wide voltage range DC/DC non-isolated power supply, which could be used for the purpose of developing a product at a later stage, solely dedicated for performing the minimum pick-up measurement. Furthermore, Megger have expressed their interest in having a solution based on digital control implementation if applicable, in order for them to explore and evaluate the application possibilities and limitations which yield with the transition from analog to digital control implementation.
+
+Based on this, the primary aim of the project is to design, implement in hardware and deliver a functional prototype DC/DC converter, which shall establish the base for developing a product as aforementioned. In addition, since the project consists of numerous multidisciplinary tasks to be executed and given the tight time horizon of the thesis, it is unavoidably expected that there shall be imperfections, omissions and mistakes, which can eventually compromise the initial design specifications set. For this reason, one further goal set is to actually identify those problems, explain their origins and propose effective solutions in order to overcome them in the next prototype version.
+
+\subsection{Approach}
+
+Hardware development is often a procedure which does not evolve linearly. As far as this project is concerned, initial models and specifications had to be modified after the prototype board was designed, in order to meet the first goal of delivering a functional converter. Therefore, the system specifications presented in this report is a result of iterations and adjustments on the initial design specifications.
+
+The tasks executed during the thesis period were highly extensive and therefore, many aspects are omitted in this report. Briefly, the actual development procedure could be described by the following stages:
+
+\begin{itemize}
+    \item Theoretical and practical comparative investigation between different converter topologies, such that proper topology is selected for our application.
+    \item Investigation of whether it would be feasible and beneficial to implement digital control instead of analog or hybrid.
+    \item Determination of the controller type to be used for the main converter and model verification using Matlab/Simulink.
+    \item Dimensioning of the power components and design of magnetics.
+    \item Hardware design of the auxiliary power supplies (housekeeping), analog (gate drivers, signal measurement, fault protection) and digital (micro-controller, logic, serial communication) circuitry.
+    \item Schematic and layout design of the prototype board.
+    \item Hardware debugging and verification for each functional block separately.
+    \item Programming of the micro-controller firmware (digital controller, user interface).
+    \item Processor-in-Loop (PiL) testing using commercial software.
+    \item System verification and collection of measurements.
+    \end{itemize}
+    
+\selectlanguage{greek}
+\subsection{Περιορισμοί}
+
+Παρακάτω, αναφέρονται οι πιο σημαντικοί περιορισμοί που συναντήθηκαν κατά τη διαδικασία της υλοποίησης.
+
+\begin{enumerate}
+    \item Το λογισμικό της \selectlanguage{english}Apple\selectlanguage{greek}, εισάγει έναν πολύ αυστηρό περιορισμό στην καταγραφή ΗΚΓ: η καταγραφή δεν μπορεί να γίνεται στο \selectlanguage{english}background\selectlanguage{greek}, καθώς επίσης, πρέπει να έχει διάρκεια ακριβώς 30 δευτερόλεπτα. Ο περιορισμός αυτός εισάγει πολλά σημαντικά εμπόδια στη μελέτη, καθώς στη βιβλιογραφία υπάρχουν ελάχιστα παραδείγματα χρήσης τόσο μικρών διαστημάτων για την ταξινόμηση κάποιου καρδειαγγειακού νοσήματος, ενώ επίσης, δεν επιτρέπει την καταγραφή του πλήρους ΗΚΓ σε διαφορετικές "φάσεις" της ημέρας του ασθενούς (ξεκούραση, άσκηση, ύπνος κ.ο.κ.), παρά μόνο στη φάση της ηρεμίας.
+    \item Όσον αφορά στο κομμάτι της ενσωμάτωσης του μοντέλου στο κινητό του ασθενή, γίνεται εύκολα αντιληπτό ότι εισάγονται πολύ σημαντικοί περιορισμοί σχετικά με την πολυπλοκότητα του μοντέλου, καθώς επίσης και την πολυπλοκότητα της προεπεξεργασίας των δεδομένων. Παρότι η εφαρμογή αναφέρεται σε συσκευές με ικανή υπολογιστική ισχύ, αναμφίβολα δεν μπορούν να συγκριθούν με έναν σύγχρονο υπολογιστή.
+    \item Τέλος, ένα εξίσου σημαντικό πρόβλημα με τα παραπάνω είναι η περιορισμένη ύπαρξη διαθέσιμων ΗΚΓ από άτομα με στεφανιαία νόσο στο διαδίκτυο. Παρότι το μέγεθος των υπάρχοντων \selectlanguage{english}dataset\selectlanguage{greek} είναι ικανά μεγάλο για την ανάπτυξη και αξιολόγηση μοντέλων μηχανικής μάθησης, η ύπαρξη περισσότερων δεδομένων θα βοηθούσε αισθητά τον παρόντα τομέα έρευνας.
+\end{enumerate}
+
+\selectlanguage{greek}
+\subsection{Διάρθρωση Μελέτης}
+
+Η παρούσα διπλωματική εργασία περιέχει τα παρακάτω κεφάλαια.
+
+\begin{itemize}
+    \item Κεφάλαιο 1 - Εισαγωγή.
+    \item Κεφάλαιο 2 - Κατασκευή και αξιολόγηση μοντέλου μηχανικής μάθησης.
+    \item Κεφάλαιο 3 - Σχεδιασμός και κατασκευή εφαρμογής για\selectlanguage{english} iOS.\selectlanguage{greek}
+    \item Κεφάλαιο 4 - Επικοινωνία εφαρμογής με το μοντέλο μηχανικής μάθησης.
+    \item Κεφάλαιο 5 - Συμπεράσματα και συζήτηση.
+\end{itemize}

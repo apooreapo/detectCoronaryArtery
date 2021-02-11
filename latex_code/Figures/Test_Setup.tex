@@ -1,0 +1,88 @@
+\begin{circuitikz}[american voltages]
+\draw
+(1.8,2.8) node[spdt] (Sw1) {}
+(Sw1.in) node[left] {}
+(Sw1.out 1) node[right] {}
+(Sw1.out 2) node[right] {}
+(Sw1.in) to[open] ++(1.7,0) coordinate (Sw1out)
+
+(1.8,1.2) node[spdt] (Sw2) {}
+(Sw2.in) node[left] {}
+(Sw2.out 1) node[right] {}
+(Sw2.out 2) node[right] {}
+(Sw2.in) to[open] ++(1.7,0) coordinate (Sw2out)
+
+(7.8,2.8) node[spdt] (Sw3) {}
+(Sw3.in) node[left] {}
+(Sw3.out 1) node[right] {}
+(Sw3.out 2) node[right] {}
+(Sw3.in) to[open] ++(1.7,0) coordinate (Sw3out)
+(Sw3.in) to[open] ++(-0.8,0) coordinate (Sw3in)
+
+(7.8,1.2) node[spdt] (Sw4) {}
+(Sw4.in) node[left] {}
+(Sw4.out 1) node[right] {}
+(Sw4.out 2) node[right] {}
+(Sw4.in) to[open] ++(1.7,0) coordinate (Sw4out)
+(Sw4.in) to[open] ++(-0.8,0) coordinate (Sw4in)
+;
+
+\draw 
+(-1,2.8) coordinate (VBPLUS) to[battery] (-1,1.2) coordinate (VBMINUS)
+(VBPLUS) |- (Sw1.in)
+(Sw1.out 2) to[short,-] (Sw1out) to[short] (4,2.8)
+(VBMINUS) |- (Sw2.in)
+(Sw2.out 2) to[short,-] (Sw2out) to[short] (4,1.2)
+(Sw3.out 2) to[short,-] (Sw3out) to[short] ++(2,0) coordinate (K1in)
+(Sw4.out 2) to[short,-] (Sw4out) to[short] ++(2,0) coordinate (K2in)
+;
+
+\draw (4,0.45) rectangle (6,3.55)
+(Sw2.in) to[open] ++(-0.1,-0.75) rectangle ++(2,3.1)
+(Sw4.in) to[open] ++(-0.1,-0.75) rectangle ++(2,3.1)
+(Sw4.in) to[open] ++(3,-0.75) rectangle ++(2,3.1)
+(-2,0.45) rectangle (0,3.55)
+(4,0.45) to[short] (6,3.55)
+(4.3,2.6) to (4.8,2.6)
+(4.3,2.5) to (4.8,2.5)
+(5.2,1.4) to (5.7,1.4)
+(5.2,1.5) to (5.7,1.5)
+;
+
+\draw
+(6,2.8) to (Sw3.in)
+(Sw4.in) to[short] ++(-0.5,0) to[short,-*] ++(0,1.6)
+;
+\draw
+(K1in) to[short] ++(0,0.2) coordinate (K1diag1) to[short] ++(0.8,0) to[short] ++(0,-0.2) coordinate (K1out) to[short] ++(0,-0.2) coordinate (K1diag2) to[short] ++(-0.8,0) to[short] ++(0,0.2)
+(K1diag1) to[short] (K1diag2)
+
+(K2in) to[short] ++(0,0.2) coordinate (K2diag1) to[short] ++(0.8,0) to[short] ++(0,-0.2) coordinate (K2out) to[short] ++(0,-0.2) coordinate (K2diag2) to[short] ++(-0.8,0) to[short] ++(0,0.2)
+(K2diag1) to[short] (K2diag2)
+
+(K1out) to[short] ++(1,0) to[short] ++(0,-2.6) -| (Sw4in) to[short] ++(-0.4,0)
+(K2out) to[short,-*] ++(1,0)
+;
+
+\draw
+node(T1) at (5.,4.2){DC/DC}
+node(T2) at (5.,3.8){Power Converter}
+node(T3) at (2.1,4.2){Input}
+node(T4) at (2.1,3.8){Disconnectors}
+node(T5) at (-1.,4.2){DC Power Source}
+node(T6) at (-1.,3.8){or Battery}
+node(T7) at (8.1,4.2){Switch}
+node(T8) at (8.1,3.8){Analyser}
+node(T9) at (11.15,4.2){High Voltage}
+node(T10) at (11.15,3.8){Circuit Breaker}
+node(T11) at (11.2,3.3){\emph{open} coil}
+node(T12) at (11.2,1.7){\emph{close} coil}
+node(OpenPlus) at (10.7,2.95){$+$}
+node(ClosePlus) at (10.7,1.35){$+$}
+node(VoPlusSym) at (6.2,2.6){$+$}
+node(VoPlusSym) at (6.2,1.4){$-$}
+node(ViPlusSym) at (3.8,2.6){$+$}
+node(ViPlusSym) at (3.8,1.4){$-$}
+;
+
+\end{circuitikz}

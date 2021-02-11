@@ -1,0 +1,60 @@
+\begin{circuitikz}[american voltages]
+
+\draw 
+node[coordinate](mos) at (4.5,-1){}
+node[coordinate](mosD) at (4.5,-0.2){}
+node[coordinate](mosS) at (4.5,-1.8){}
+ node[coordinate](vplus) at (1,0.1) {}
+ node[coordinate](L1) at (3,4) {}
+ node[coordinate](L2) at (3,1.9) {}
+ node[coordinate](vminus2) at ([yshift=-0.4cm]mosS) {}
+ node[coordinate](vminus) at (1,-2.2) {}
+ node[coordinate](C1a) at (10,0.1) {}
+ node[coordinate](C1b) at (10,-2.2) {}
+ node[coordinate](R1) at (12,0.1) {}
+;
+
+\draw (5.7,-0.2) to[twoport,n=S1,-] (5.7,-1.8);
+\filldraw
+ (5.5,-0.9)--(5.7,-0.7) -- (5.9,-0.9) -- (5.5,-0.9);
+\filldraw
+(5.5,-1.1)--(5.7,-1.3) -- (5.9,-1.1) -- (5.5,-1.1);
+
+\draw (4.55, -1) edge[bend left=60, thick,->] (5.05,-1);
+
+\draw 
+    (vplus) to[american voltage source] (vminus)
+    (vplus) to[short,-] ([xshift=-2.5cm,yshift=0.3cm]mosD) 
+    to[open,i=$I_1$] ([xshift=-1.5cm,yshift=0.3cm]mosD)
+    to[short] ([xshift=-0.3cm,yshift=0.3cm]mosD) to[R,-] ([xshift=-0.3cm,yshift=-2cm]mosD)
+    to[short] (vminus)
+    
+    ([xshift=-2.5cm,yshift=0.3cm]mosD) 
+    to[short] ([xshift=-1.5cm,yshift=0.3cm]mosD)
+    
+    ([xshift=1.2cm]mosS) to[open,-]([xshift=1.2cm]mosD) 
+    to([xshift=1.2cm,yshift=0.3cm]mosD)
+    to[open,i=$I_2$]([xshift=2.6cm,yshift=0.3cm]mosD) 
+    to[short,-] (8.6,0.1)
+    
+    ([xshift=1.2cm]mosS) to([xshift=1.2cm]vminus2)
+    to(8.6,-2.2) to[R,-] (8.6,0.1)
+    
+    ([xshift=-1.2cm,yshift=0.2cm]mosD) to[open,v=$V_1$] ([xshift=-1.2cm,yshift=-0.4cm]mosS)
+    
+    ([xshift=1.8cm,yshift=0.2cm]mosD) to[open,v^=$V_2$] ([xshift=1.8cm,yshift=-0.4cm]mosS)
+    
+    (8.8,0.1) to[open,v^=$V$] (8.8,-2.2)
+    
+    ([xshift=1.2cm,yshift=0.3cm]mosD)
+   to[short]([xshift=2.4cm,yshift=0.3cm]mosD)
+;
+
+\draw[dashed] (3.3,-2.5) rectangle (6.3,0.4){}; 
+\draw 
+    node(vg) at (0.2,-1.1){$V_g$}
+    node(R1) at (8,-1.1){$R$}
+    node(R1) at (3.7,-1){$R_e$}
+    node(SW) at (4.8,0.7){Switch Network}
+;
+\end{circuitikz}
