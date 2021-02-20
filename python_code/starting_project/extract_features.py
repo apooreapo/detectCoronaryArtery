@@ -59,7 +59,10 @@ class Extraction:
                  "HR max - HR min", "VLF Energy", "VLF Energy Percentage", "LF Energy", "LF Energy Percentage",
                  "HF Energy", "HF Energy Percentage", "Poincare sd1", "Poincare sd2", "Poincare ratio",
                  "Poincare Ellipsis Area", "Mean Approximate Entropy", "Approximate Entropy std",
-                 "Mean Sample Entropy", "Sample Entropy std", "Short-term Fluctuation", "Long-term Fluctuation"]
+                 "Mean Sample Entropy", "Sample Entropy std", "Short-term Fluctuation", "Long-term Fluctuation",
+                 "File title", "Has CAD",
+                 "VLF Peak", "LF Peak", "HF Peak", "LF/HF Energy"]
+        # names = ["VLF Peak", "LF Peak", "HF Peak", "LF/HF Energy"]
         # units = ["msec", "bpm", "msec", "msec", "msec", "msec", "NaN", "msec", "NaN", "bpm", "NaN", "NaN", "NaN",
         #          "NaN", "NaN", "NaN", "msec", "msec", "NaN", "msec^2", "NaN", "NaN", "NaN", "NaN", "NaN", "NaN"]
         # calculation_times_app = [0.00069, 0.00032, 0.00062, 0.00128, 0.13853, 0.13853, 0.00052, 0.00073,
@@ -74,8 +77,8 @@ class Extraction:
         tic = time.perf_counter()
 
         column_titles = names
-        column_titles.append("File Title")
-        column_titles.append("Has CAD")
+        # column_titles.append("File Title")
+        # column_titles.append("Has CAD")
 
         res_dict = {}
         for name in column_titles:
@@ -83,6 +86,8 @@ class Extraction:
 
 
         # data_length = 1  # use this with print_message = true for testing purposes
+
+
         data_length = len(self.data)
         pbar = tqdm(total=data_length)
 
@@ -96,7 +101,7 @@ class Extraction:
             if len(normalized_differences) > 2:
                 # time_durations = []
 
-                # tic = time.perf_counter()
+                tic = time.perf_counter()
                 res = self.__sdrr(differences=differences)
                 res_dict[column_titles[0]].append(res)
 
@@ -174,24 +179,31 @@ class Extraction:
 
                 # tic = time.perf_counter()
                 fourier_transform = fft_transform.FFTTransform(fs=self.fs, data_series=current_data)
-                res9a, res9b = fourier_transform.vlf_band()
+                res9a, res9b, res28 = fourier_transform.vlf_band()
                 res_dict[column_titles[10]].append(res9a)
                 res_dict[column_titles[11]].append(res9b)
                 if print_message:
                     print(f"VLF band energy is {res9a}.")
                     print(f"VLF band energy is {round(res9b * 100, 2)}% of the full energy.")
-                res10a, res10b = fourier_transform.lf_band()
+                    print(f"VLF Energy peak is at {round(res28, 3)} Hz.")
+                res10a, res10b, res29 = fourier_transform.lf_band()
                 res_dict[column_titles[12]].append(res10a)
                 res_dict[column_titles[13]].append(res10b)
                 if print_message:
                     print(f"LF band energy is {res10a}.")
                     print(f"LF band energy is {round(res10b * 100, 2)}% of the full energy.")
-                res11a, res11b = fourier_transform.hf_band()
+                    print(f"LF Energy peak is at {round(res29, 3)} Hz.")
+                res11a, res11b, res30 = fourier_transform.hf_band()
                 res_dict[column_titles[14]].append(res11a)
                 res_dict[column_titles[15]].append(res11b)
                 if print_message:
                     print(f"HF band energy is {res11a}.")
                     print(f"HF band energy is {round(res11b * 100, 2)}% of the full energy.")
+                    print(f"HF Energy peak is at {round(res30, 3)} Hz.")
+                if res10a > 0:
+                    res31 = res10a / res11a
+                if print_message:
+                    print(f"LF / HF energy is {round(res31, 5)}.")
                 # toc = time.perf_counter()
                 # for _ in range(0, 6):
                 #     time_durations.append((toc - tic) / 6)
@@ -249,6 +261,11 @@ class Extraction:
                 txt = self.file.split(sep='/')[2]
                 res_dict[column_titles[26]].append(txt)
                 res_dict[column_titles[27]].append(1)
+                res_dict[column_titles[28]].append(res28)
+                res_dict[column_titles[29]].append(res29)
+                res_dict[column_titles[30]].append(res30)
+                res_dict[column_titles[31]].append(res31)
+                # print(res_dict)
             else:
                 for i in range(0, len(column_titles)):
                     res_dict[column_titles[i]].append(float("nan"))
@@ -258,6 +275,7 @@ class Extraction:
         pbar.close()
         toc = time.perf_counter()
         print(f"Total extraction time: {round(toc - tic, 3)} sec.")
+        # print(res_dict)
         return res_dict
 
     def extract_ultra_short_features(self):

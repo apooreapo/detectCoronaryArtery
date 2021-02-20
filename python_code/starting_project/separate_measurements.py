@@ -17,10 +17,13 @@ class Separation:
          'data' is a list of pandas.Series objects and 'fs' is the sampling frequency."""
         # example file: "16265.csv"
         data_frame = pd.read_csv(self.file, header=None,
-                                 names=['time_step', 'first_measurement', 'second_measurement'],
+                                 names=['time_step', 'first_measurement', 'second_measurement', 'third_measurement'],
                                  delim_whitespace=True)
         fs = (data_frame.time_step.size - 1) / data_frame.time_step.values[-1]
+        # fs = data_frame.time_step[1000] / 1000
         fs = round(fs, 5)
+        # print("hello")
+        # print(data_frame['time_step'][1])
         result = []
         step = math.ceil(fs*self.time_duration)
         meas = data_frame["first_measurement"]

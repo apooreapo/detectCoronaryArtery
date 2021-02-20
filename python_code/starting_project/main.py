@@ -18,7 +18,7 @@ if len(args) > 1:
     # print(txt)
     res = pd.DataFrame(myExtraction.extract_short_features())
     # count += 1
-    output = "./extracted_features/final_extracted_"+txt
+    output = "./extracted_features/final_extracted_"+txt[:-4]+"_freq_add_on.csv"
     res.to_csv(path_or_buf=output)
     del res
     del myExtraction
