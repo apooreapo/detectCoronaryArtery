@@ -42,9 +42,12 @@ class FFTTransform:
 
     def vlf_band(self) -> tuple:
         """Calculates the energy of the Very Low Frequency Band (0.0033 - 0.04 Hz)
-        Returns the vlf energy, and its percentage to the full energy in a tuple: 'energy, percentage'."""
+        Returns the vlf energy, its percentage to the full energy and the peak energy of the band
+        in a tuple: 'energy, percentage, peak'."""
         lower_limit = 0.0033 * self.time_period
         upper_limit = 0.04 * self.time_period
+        peak_energy = 0.0
+        peak_energy_position = 0
         temp_sum = 0
         full_sum = 0
         for i in range(0, int(len(self.data_series) / 2)):
@@ -52,51 +55,69 @@ class FFTTransform:
         for i in range(0, len(self.np_arr)):
             if i >= lower_limit:
                 if i <= upper_limit:
-                    temp_sum += abs(self.fourier_transform[i]) ** 2
+                    temp1 = abs(self.fourier_transform[i]) ** 2
+                    temp_sum += temp1
+                    if peak_energy < temp1:
+                        peak_energy = temp1
+                        peak_energy_position = i / self.time_period
                 else:
                     break
         percentage = temp_sum / full_sum
         # print(f"VLF band energy is {round(percentage * 100, 4)}% of the full energy.")
         # print(f"VLF energy is {temp_sum}.")
         temp_sum *= self.resolution  # Resolution is equivalent to dx in our computation sum
-        return temp_sum, percentage
+        return temp_sum, percentage, peak_energy_position
 
     def lf_band(self) -> tuple:
         """Calculates the energy of the Low Frequency Band (0.04 - 0.15 Hz)
-        Returns the lf energy, and its percentage to the full energy in a tuple: 'energy, percentage'."""
+        Returns the lf energy, its percentage to the full energy and the peak energy of the band
+        in a tuple: 'energy, percentage, peak'."""
         lower_limit = 0.04 * self.time_period
         upper_limit = 0.15 * self.time_period
         temp_sum = 0
         full_sum = 0
+        peak_energy = 0.0
+        peak_energy_position = 0
         for i in range(0, int(len(self.data_series) / 2)):
             full_sum += abs(self.fourier_transform[i]) ** 2
         for i in range(0, len(self.np_arr)):
-            if i > lower_limit:
+            if i >= lower_limit:
                 if i <= upper_limit:
-                    temp_sum += abs(self.fourier_transform[i]) ** 2
+                    temp1 = abs(self.fourier_transform[i]) ** 2
+                    temp_sum += temp1
+                    if peak_energy < temp1:
+                        peak_energy = temp1
+                        peak_energy_position = i / self.time_period
                 else:
                     break
         percentage = temp_sum / full_sum
         # print(f"LF band energy is {round(percentage * 100, 2)}% of the full energy.")
         temp_sum *= self.resolution  # Resolution is equivalent to dx in our computation sum
-        return temp_sum, percentage
+        return temp_sum, percentage, peak_energy_position
 
     def hf_band(self) -> tuple:
         """Calculates the energy of the High Frequency Band (0.15 - 0.40 Hz)
-        Returns the hf energy, and its percentage to the full energy in a tuple: 'energy, percentage'."""
+        Returns the lf energy, its percentage to the full energy and the peak energy of the band
+        in a tuple: 'energy, percentage, peak'."""
         lower_limit = 0.15 * self.time_period
         upper_limit = 0.4 * self.time_period
         temp_sum = 0
         full_sum = 0
+        peak_energy = 0.0
+        peak_energy_position = 0
         for i in range(0, int(len(self.data_series) / 2)):
             full_sum += abs(self.fourier_transform[i]) ** 2
         for i in range(0, len(self.np_arr)):
-            if i > lower_limit:
+            if i >= lower_limit:
                 if i <= upper_limit:
-                    temp_sum += abs(self.fourier_transform[i]) ** 2
+                    temp1 = abs(self.fourier_transform[i]) ** 2
+                    temp_sum += temp1
+                    if peak_energy < temp1:
+                        peak_energy = temp1
+                        peak_energy_position = i / self.time_period
                 else:
                     break
         percentage = temp_sum / full_sum
         # print(f"HF band energy is {round(percentage * 100, 2)}% of the full energy.")
         temp_sum *= self.resolution  # Resolution is equivalent to dx in our computation sum
-        return temp_sum, percentage
+        return temp_sum, percentage, peak_energy_position
