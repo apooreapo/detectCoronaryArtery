@@ -1,0 +1,40 @@
+\selectlanguage{english}
+
+\tikzstyle{block} = [draw, rectangle,
+    minimum height=3em, minimum width=4em, align=center, rounded corners = 3pt]
+\tikzstyle{sum} = [draw, fill=blue!20, circle, node distance=1cm]
+\tikzstyle{input} = [coordinate]
+\tikzstyle{output} = [coordinate]
+\tikzstyle{pinstyle} = [pin edge={to-,thin,black}]
+
+% The block diagram code is probably more verbose than necessary
+\begin{tikzpicture}[auto]
+    % We start by placing the blocks
+    \node [input, name=input1] {};
+    % \node [sum, right of=input] (sum) {};
+    \node [block]  (band1) [right=1cm of input1] {Band-pass \\ filtering};
+    \node [block] (derivative1) [right=1cm of band1] {Derivative filter};
+    \node [block] (squaring1) [right=1cm of derivative1] {Squaring};
+    \node [block] (moving1) [right=1cm of squaring1] {Moving window \\integration};
+    % \node [block, right=of controller, pin={[pinstyle]above:Disturbances},
+    %         node distance=3cm] (system) {System of Dawn is the system};
+    % We draw an edge between the controller and system block to 
+    % calculate the coordinate u. We need it to place the measurement block. 
+    % \draw [->] (controller) -- node[name=u] {$u$} (system);
+    \node [output1] [right=1cm of moving1] (output1) {};
+
+    % Once the nodes are placed, connecting them is easy. 
+    \draw [draw,->] (input1) -- node {$ECG$} (band1);
+    \draw [->] (band1) -- node {} (derivative1);
+    \draw [->] (derivative1) -- node {} (squaring1);
+    \draw [->] (squaring1) -- node {} (moving1);
+    % \draw [->] (moving) -- node [name=y] {$y$}(output);
+    % \draw [->] (moving) |- node {} (derivative);
+    % \draw [->] (sum) -- node {$e$} (controller);
+    % \draw [->] (moving) -- node [name=y]; {$y$}(output);
+    % \draw [->] (y) |- (measurements);
+    % \draw [->] (measurements) -| node[pos=0.99] {$-$} 
+    %     node [near end] {$y_m$} (sum);
+\end{tikzpicture}
+
+\selectlanguage{greek}
