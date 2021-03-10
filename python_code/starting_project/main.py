@@ -11,17 +11,16 @@ import gc
 args = sys.argv
 if len(args) > 1:
     file = args[1]
-    txt = file.split(sep='/')[2]
+    txt = file.split(sep='/')[3]
+    print(txt)
     # print(f"File number {count} out of {len(files)}: {txt}")
-    myExtraction = Extraction(file)
     # print(file)
     # print(txt)
-    res = pd.DataFrame(myExtraction.extract_short_features())
+    res = pd.DataFrame(Extraction(file).extract_ultra_short_features())
     # count += 1
-    output = "./extracted_features/final_extracted_"+txt[:-4]+"_freq_add_on.csv"
+    output = "./extracted_features/ultra_short_final_extracted_"+txt
     res.to_csv(path_or_buf=output)
     del res
-    del myExtraction
     gc.collect()
 # res = pd.concat(dataframes, ignore_index=True)
 

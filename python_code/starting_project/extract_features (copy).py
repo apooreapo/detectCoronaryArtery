@@ -289,6 +289,7 @@ class Extraction:
         # print(res_dict)
         return res_dict
 
+    @profile
     def extract_ultra_short_features(self, print_message=False):
         """The method for extracting ECG features in an ultra short window."""
 
@@ -316,7 +317,7 @@ class Extraction:
         # data_length = 1  # use this with print_message = true for testing purposes
 
         data_length = len(self.ultra_short_data)
-        # data_length = 10
+        data_length = 10
         pbar = tqdm(total=data_length)
 
         for index in range(0, data_length):
@@ -422,10 +423,6 @@ class Extraction:
                 #     time_durations.append((toc - tic) / 6)
 
                 # tic = time.perf_counter()
-                # res12a = 0
-                # res12b = 0
-                # res12c = 0
-                # res12d = 0
                 res12a, res12b, res12c, res12d = self.__poincare(normalized_differences=self.normalized_differences)
                 res_dict[column_titles[12]].append(res12a)
                 res_dict[column_titles[13]].append(res12b)
@@ -467,11 +464,12 @@ class Extraction:
                 # time_durations.append((toc - tic) / 2)
                 txt = self.file.split(sep='/')[2]
                 res_dict[column_titles[20]].append(txt)
-                res_dict[column_titles[21]].append(0)
+                res_dict[column_titles[21]].append(1)
                 res_dict[column_titles[22]].append(res29)
                 res_dict[column_titles[23]].append(res30)
                 res_dict[column_titles[24]].append(res31)
                 # print(res_dict)
+                print(sys.getrefcount(fourier_transform))
                 del res29, txt, res14a, res14b, res13a, res13b, res12a, res12b, res12c, res12d, res31
                 del res30, res11a, res11b, res10a, res10b, res7b, res5, res4, res3b, res2, res
 
@@ -667,22 +665,11 @@ class Extraction:
         return temp_max / len(normalized_differences)
 
     def __poincare(self, normalized_differences):
-        """Returns poincare metrics, as tuple (sd1, sd2, ratio, area)."""
-        # difs = normalized_differences / self.fs
-        # res = pyhrv.nonlinear.poincare(nni=difs, show=False)
-        # return res["sd1"], res["sd2"], res["sd_ratio"], res["ellipse_area"]
-        # # sd1 is equal to (0.5 * rmssd) ^ 0.5
-        nn = self.normalized_differences / self.fs * 1000
-        x1 = np.asarray(nn[:-1])
-        x2 = np.asarray(nn[1:])
-        sd1 = np.std(np.subtract(x1, x2) / np.sqrt(2))
-        sd2 = np.std(np.add(x1, x2) / np.sqrt(2))
-        area = np.pi * sd1 * sd2
-        if sd1 > 0:
-            ratio = sd2 / sd1
-        else:
-            ratio = 0
-        return sd1, sd2, ratio, area
+        """Returns poincare metrics, as tuple (sd1, sd2, sd ratio, ellipse area)."""
+        difs = normalized_differences / self.fs
+        res = pyhrv.nonlinear.poincare(nni=difs, show=False)
+        return res["sd1"], res["sd2"], res["sd_ratio"], res["ellipse_area"]
+        # sd1 is equal to (0.5 * rmssd) ^ 0.5
 
     def __approximate_entropy_mean_and_std(self, data_array, m, r, window: int) -> tuple:
         """Returns the mean and standard deviation of approximate energy, in a tuple."""
