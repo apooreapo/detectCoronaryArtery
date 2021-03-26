@@ -60,6 +60,7 @@ class Extraction:
         self.normalized_differences = []
         self.r_peaks = []
         self.current_data = []
+        self.factor = int(round(self.fs / 64))
 
     def extract_short_features(self, print_message=False) -> dict:
         """The method for extracting ECG features in a short window.
@@ -72,7 +73,7 @@ class Extraction:
                  "HR max - HR min", "VLF Energy", "VLF Energy Percentage", "LF Energy", "LF Energy Percentage",
                  "HF Energy", "HF Energy Percentage", "Poincare sd1", "Poincare sd2", "Poincare ratio",
                  "Poincare Ellipsis Area", "Mean Approximate Entropy", "Approximate Entropy std",
-                 "Mean Sample Entropy", "Sample Entropy std", "Short-term Fluctuation", "Long-term Fluctuation",
+                 "Mean Sample Entropy", "Sample Entropy std",
                  "File title", "Has CAD",
                  "VLF Peak", "LF Peak", "HF Peak", "LF/HF Energy"]
         # names = ["VLF Peak", "LF Peak", "HF Peak", "LF/HF Energy"]
@@ -109,6 +110,7 @@ class Extraction:
             for i in range(1, len(r_peaks)):
                 differences.append(r_peaks[i] - r_peaks[i-1])
             normalized_differences = self.__normalized_differences(differences=differences)
+            normalized_current_data = self.__normalize_and_downscale(data_series=current_data, factor=self.factor)
             if len(normalized_differences) > 2:
                 # time_durations = []
 
@@ -234,7 +236,7 @@ class Extraction:
                 #     time_durations.append((toc - tic) / 4)
 
                 # tic = time.perf_counter()
-                res13a, res13b = self.__approximate_entropy_mean_and_std(data_array=current_data.array, m=2,
+                res13a, res13b = self.__approximate_entropy_mean_and_std(data_array=normalized_current_data, m=2,
                                                                          r=0.04, window=5)
                 res_dict[column_titles[20]].append(res13a)
                 res_dict[column_titles[21]].append(res13b)
@@ -246,7 +248,7 @@ class Extraction:
                 # time_durations.append((toc - tic) / 2)
 
                 # tic = time.perf_counter()
-                res14a, res14b = self.__sample_entropy_mean_and_std(data_array=current_data.array, r=0.04, window=5)
+                res14a, res14b = self.__sample_entropy_mean_and_std(data_array=normalized_current_data, r=0.04, window=5)
                 res_dict[column_titles[22]].append(res14a)
                 res_dict[column_titles[23]].append(res14b)
                 # toc = time.perf_counter()
@@ -258,24 +260,24 @@ class Extraction:
                 # time_durations.append((toc - tic) / 2)
 
                 # tic = time.perf_counter()
-                res15 = pyhrv.nonlinear.dfa(normalized_differences, show=False)
-                res15a = res15["dfa_alpha1"]
-                res15b = res15["dfa_alpha2"]
-                res_dict[column_titles[24]].append(res15a)
-                res_dict[column_titles[25]].append(res15b)
-                if print_message:
-                    print(f"Alpha value of the short-term fluctuations is {res15a}.")
-                    print(f"Alpha value of the long-term fluctuations is {res15b}.")
+                # res15 = pyhrv.nonlinear.dfa(normalized_differences, show=False)
+                # res15a = res15["dfa_alpha1"]
+                # res15b = res15["dfa_alpha2"]
+                # res_dict[column_titles[24]].append(res15a)
+                # res_dict[column_titles[25]].append(res15b)
+                # if print_message:
+                #     print(f"Alpha value of the short-term fluctuations is {res15a}.")
+                #     print(f"Alpha value of the long-term fluctuations is {res15b}.")
                 # toc = time.perf_counter()
                 # time_durations.append((toc - tic) / 2)
                 # time_durations.append((toc - tic) / 2)
-                txt = self.file.split(sep='/')[2]
-                res_dict[column_titles[26]].append(txt)
-                res_dict[column_titles[27]].append(1)
-                res_dict[column_titles[28]].append(res28)
-                res_dict[column_titles[29]].append(res29)
-                res_dict[column_titles[30]].append(res30)
-                res_dict[column_titles[31]].append(res31)
+                txt = self.file.split(sep='/')[3]
+                res_dict[column_titles[24]].append(txt)
+                res_dict[column_titles[25]].append(1)
+                res_dict[column_titles[26]].append(res28)
+                res_dict[column_titles[27]].append(res29)
+                res_dict[column_titles[28]].append(res30)
+                res_dict[column_titles[29]].append(res31)
                 # print(res_dict)
             else:
                 for i in range(0, len(column_titles)):
@@ -327,6 +329,7 @@ class Extraction:
             for i in range(1, len(self.r_peaks)):
                 self.differences.append(self.r_peaks[i] - self.r_peaks[i - 1])
             self.normalized_differences = self.__normalized_differences(differences=self.differences)
+            normalized_current_data = self.__normalize_and_downscale(data_series=self.current_data, factor=self.factor)
             if len(self.normalized_differences) > 2:
                 # time_durations = []
 
@@ -440,7 +443,8 @@ class Extraction:
                 #     time_durations.append((toc - tic) / 4)
 
                 # tic = time.perf_counter()
-                res13a, res13b = self.__approximate_entropy_mean_and_std(data_array=self.current_data.array, m=2,
+                res13a, res13b = self.__approximate_entropy_mean_and_std(data_array=normalized_current_data,
+                                                                         m=2,
                                                                          r=0.04, window=5)
                 res_dict[column_titles[16]].append(res13a)
                 res_dict[column_titles[17]].append(res13b)
@@ -452,7 +456,8 @@ class Extraction:
                 # time_durations.append((toc - tic) / 2)
 
                 # tic = time.perf_counter()
-                res14a, res14b = self.__sample_entropy_mean_and_std(data_array=self.current_data.array, r=0.04, window=5)
+                res14a, res14b = self.__sample_entropy_mean_and_std(data_array=normalized_current_data,
+                                                                    r=0.04, window=5)
                 res_dict[column_titles[18]].append(res14a)
                 res_dict[column_titles[19]].append(res14b)
                 # toc = time.perf_counter()
@@ -465,7 +470,7 @@ class Extraction:
 
                 # time_durations.append((toc - tic) / 2)
                 # time_durations.append((toc - tic) / 2)
-                txt = self.file.split(sep='/')[2]
+                txt = self.file.split(sep='/')[3]
                 res_dict[column_titles[20]].append(txt)
                 res_dict[column_titles[21]].append(0)
                 res_dict[column_titles[22]].append(res29)
@@ -672,7 +677,7 @@ class Extraction:
         # res = pyhrv.nonlinear.poincare(nni=difs, show=False)
         # return res["sd1"], res["sd2"], res["sd_ratio"], res["ellipse_area"]
         # # sd1 is equal to (0.5 * rmssd) ^ 0.5
-        nn = self.normalized_differences / self.fs * 1000
+        nn = normalized_differences / self.fs * 1000
         x1 = np.asarray(nn[:-1])
         x2 = np.asarray(nn[1:])
         sd1 = np.std(np.subtract(x1, x2) / np.sqrt(2))
@@ -700,13 +705,14 @@ class Extraction:
 
             return abs(_phi(m2 + 1) - _phi(m2))
 
-        window_samples = int(window * self.fs)
+        window_samples = int(window * self.fs / self.factor)
         approximate_energy = []
-        for i in range(0, len(data_array), window_samples):
+        for i in range(0, len(data_array) - int(window_samples / 2), int(window_samples / 2)):
             if i+window_samples < len(data_array):
                 approximate_energy.append(approximate_entropy(data_arr=data_array[i:i+window_samples], m2=m, r1=r))
             else:
-                approximate_energy.append(approximate_entropy(data_arr=data_array[i:], m2=m, r1=r))
+                # approximate_energy.append(approximate_entropy(data_arr=data_array[i:], m2=m, r1=r))
+                break
         mn = statistics.mean(approximate_energy)
         sd = statistics.stdev(approximate_energy)
         return mn, sd
@@ -737,13 +743,14 @@ class Extraction:
             gc.collect()
             return -np.log(a / b)
 
-        window_samples = int(window * self.fs)
+        window_samples = int(window * self.fs / self.factor)
         sample_entropy = []
-        for i in range(0, len(data_array), window_samples):
+        for i in range(0, len(data_array) - int(window_samples / 2), int(window_samples / 2)):
             if i + window_samples < len(data_array):
                 sample_entropy.append(sampen(data=data_array[i:i + window_samples], r1=r, m=2))
             else:
-                sample_entropy.append(sampen(data=data_array[i:], r1=r, m=2))
+                # sample_entropy.append(sampen(data=data_array[i:], r1=r, m=2))
+                break
         mn = statistics.mean(sample_entropy)
         sd = statistics.stdev(sample_entropy)
         return mn, sd
@@ -781,3 +788,15 @@ class Extraction:
 
         # Return SampEn
         return -np.log(a / b)
+
+    def __normalize_and_downscale(self, data_series, factor):
+        """Normalizes a data series list, so that max mag is 1 and also downscales it by a factor.
+        Returns it as a list."""
+        output = []
+        counter = factor
+        for data in data_series:
+            if counter % factor == 0:
+                output.append(data)
+            counter += 1
+        return output
+

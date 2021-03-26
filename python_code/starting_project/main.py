@@ -16,9 +16,9 @@ if len(args) > 1:
     # print(f"File number {count} out of {len(files)}: {txt}")
     # print(file)
     # print(txt)
-    res = pd.DataFrame(Extraction(file).extract_ultra_short_features())
+    res = pd.DataFrame(Extraction(file).extract_short_features(print_message=False))
     # count += 1
-    output = "./extracted_features/ultra_short_final_extracted_"+txt
+    output = "./extracted_features/short_updated/short_updated_extracted_"+txt
     res.to_csv(path_or_buf=output)
     del res
     gc.collect()

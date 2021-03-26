@@ -7,12 +7,14 @@ class FFTTransform:
     def __init__(self, fs, data_series):
         self.fs = fs
         self.data_series = data_series
+        max1 = max(data_series)
         self.sampling_interval = 1 / self.fs
         begin_time = 0
         end_time = (len(self.data_series)) * self.sampling_interval
         self.time = np.arange(begin_time, end_time, self.sampling_interval)
 
         self.np_arr = np.asarray(self.data_series, dtype=np.float)
+        self.np_arr /= max1
         self.fourier_transform = np.fft.fft(self.np_arr) / len(self.data_series)
         self.fourier_transform = self.fourier_transform[range(int(len(self.np_arr) / 2))]  # fft
         tp_count = len(self.np_arr)  # The length of the sample
@@ -20,6 +22,7 @@ class FFTTransform:
         self.time_period = tp_count / self.fs  # The full time of sample in seconds.
         self.resolution = 1 / self.time_period  # Freq resolution: 1/ time_period
         self.frequencies = values / self.time_period   # The array of different frequencies, in Hz.
+        # print(self.frequencies)
 
 
     def plot(self):
@@ -81,7 +84,7 @@ class FFTTransform:
         for i in range(0, int(len(self.data_series) / 2)):
             full_sum += abs(self.fourier_transform[i]) ** 2
         for i in range(0, len(self.np_arr)):
-            if i >= lower_limit:
+            if i > lower_limit:
                 if i <= upper_limit:
                     temp1 = abs(self.fourier_transform[i]) ** 2
                     temp_sum += temp1
@@ -100,7 +103,7 @@ class FFTTransform:
         Returns the lf energy, its percentage to the full energy and the peak energy of the band
         in a tuple: 'energy, percentage, peak'."""
         lower_limit = 0.15 * self.time_period
-        upper_limit = 0.4 * self.time_period
+        upper_limit = 0.401 * self.time_period
         temp_sum = 0
         full_sum = 0
         peak_energy = 0.0
@@ -108,7 +111,7 @@ class FFTTransform:
         for i in range(0, int(len(self.data_series) / 2)):
             full_sum += abs(self.fourier_transform[i]) ** 2
         for i in range(0, len(self.np_arr)):
-            if i >= lower_limit:
+            if i > lower_limit:
                 if i <= upper_limit:
                     temp1 = abs(self.fourier_transform[i]) ** 2
                     temp_sum += temp1
@@ -121,3 +124,20 @@ class FFTTransform:
         # print(f"HF band energy is {round(percentage * 100, 2)}% of the full energy.")
         temp_sum *= self.resolution  # Resolution is equivalent to dx in our computation sum
         return temp_sum, percentage, peak_energy_position
+    #
+    # def __downscale(self, data_series, factor):
+    #     output = []
+    #     for i in range(0, len(data_series), factor):
+    #         output.append(data_series[i])
+    #     return output
+    #
+    # def normalize_data_series(self, data_series, factor):
+    #     """Normalizes a data series list, so that max mag is 1 and also downscales it by a factor.
+    #     Returns it as a numpy array."""
+    #     max1 = max(data_series)
+    #     output = []
+    #     for i in range(0, len(data_series), factor):
+    #         output.append(data_series[i] / max1)
+    #     np_arr = np.asarray(output, dtype=np.float)
+    #     return np_arr
+
