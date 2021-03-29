@@ -110,11 +110,16 @@ class Extraction:
             for i in range(1, len(r_peaks)):
                 differences.append(r_peaks[i] - r_peaks[i-1])
             normalized_differences = self.__normalized_differences(differences=differences)
+            # print("Hello!")
+            # print(differences)
+            # print(normalized_differences)
+            # print(statistics.stdev(differences))
+            # print(statistics.stdev(normalized_differences))
             normalized_current_data = self.__normalize_and_downscale(data_series=current_data, factor=self.factor)
             if len(normalized_differences) > 2:
                 # time_durations = []
 
-                tic = time.perf_counter()
+                # tic = time.perf_counter()
                 res = self.__sdrr(differences=differences)
                 res_dict[column_titles[0]].append(res)
 
@@ -491,6 +496,248 @@ class Extraction:
         toc = time.perf_counter()
         print(f"Total extraction time: {round(toc - tic, 3)} sec.")
         return res_dict
+
+    def extract_windowed_short_features(self, print_message=False):
+        """The method for extracting ECG features using 10 ultra short windows."""
+
+        # Construct the features_list.csv with the extracted features characteristics.
+
+        # features_list_dir = []
+        windowed_factor = 10
+
+        names = ["SDRR", "Average Heart Rate", "SDNN", "SDSD", "SDANN", "SDNNI", "pNN50", "RMSSD", "HTI",
+                 "HR max - HR min", "LF Energy", "LF Energy Percentage",
+                 "HF Energy", "HF Energy Percentage", "Poincare sd1", "Poincare sd2", "Poincare ratio",
+                 "Poincare Ellipsis Area", "Mean Approximate Entropy", "Standard Deviation of Approximate Entropy",
+                 "Mean Sample Entropy", "Standard Deviation of Sample Entropy",
+                 "File title", "Has CAD",
+                 "LF Peak", "HF Peak", "LF/HF Energy"]
+
+        tic = time.perf_counter()
+
+        column_titles = names
+        # column_titles.append("File Title")
+        # column_titles.append("Has CAD")
+
+        res_dict = {}
+        for name in column_titles:
+            res_dict[name] = []
+
+        # data_length = 1  # use this with print_message = true for testing purposes
+
+        data_length = len(self.ultra_short_data)
+        # data_length = 10
+        pbar = tqdm(total=int(data_length / windowed_factor))
+
+        for indexi in range(0, int(data_length / windowed_factor)):
+            self.current_data = []
+            self.r_peaks = []
+            self.differences = []
+            self.normalized_differences = []
+            normalized_current_data = []
+            for indexj in range(0, 10):
+                self.current_data.append(self.ultra_short_data[indexi*windowed_factor + indexj])
+                self.r_peaks.append(PeaksDetection(fs=self.fs, data_series=self.current_data[-1]).detect_peaks())
+                self.differences.append([])
+                self.normalized_differences.append([])
+                for i in range(1, len(self.r_peaks[-1])):
+                    self.differences[-1].append(self.r_peaks[-1][i] - self.r_peaks[-1][i - 1])
+                self.normalized_differences[-1] = self.__normalized_differences(differences=self.differences[-1])
+                normalized_current_data.append(self.__normalize_and_downscale(data_series=self.current_data[-1],
+                                                                              factor=self.factor))
+
+            # print("Current Data:")
+            # print(len(self.current_data))
+            # print(self.current_data[9][0:5])
+            # print("R peaks:")
+            # print(len(self.r_peaks))
+            # print(self.r_peaks[9][0:5])
+            # print("Differences:")
+            # print(len(self.differences))
+            # print(self.differences[9][0:5])
+            # print("Normalized differences:")
+            # print(len(self.normalized_differences))
+            # print(self.normalized_differences[9][0:5])
+            # print("Normalized current data:")
+            # print(len(normalized_current_data))
+            # print(normalized_current_data[9][0:5])
+            # print(self.fs)
+            # print(self.factor)
+
+            # for ultra_short_diffs in self.differences:
+            #     print("Hello!")
+            #     print(ultra_short_diffs)
+            # tic = time.perf_counter()
+            flat_diffs = [item for sublist in self.differences for item in sublist]  # make it flat
+            flat_norm_diffs = [item for sublist in self.normalized_differences for item in sublist]
+            # print("Hey")
+            # print(flat_diffs)
+            # print(statistics.stdev(flat_diffs))
+            # print(flat_norm_diffs)
+            # print(statistics.stdev(flat_norm_diffs))
+            res = self.__sdrr(differences=flat_diffs)
+            res_dict[column_titles[0]].append(res)
+
+            # toc = time.perf_counter()
+            if print_message:
+                print(f"SDRR is {round(res, 2)} msec.")
+            # time_durations.append(toc - tic)
+
+            # tic = time.perf_counter()
+            res2 = self.__average_heart_rate(differences=flat_diffs)
+            res_dict[column_titles[1]].append(res2)
+            if print_message:
+                print(f"Average heart rate is {round(res2, 1)} bpm.")
+            # toc = time.perf_counter()
+            # time_durations.append(toc - tic)
+
+            # tic = time.perf_counter()
+            res3 = self.__sdnn(normalized_differences=flat_norm_diffs)
+            res_dict[column_titles[2]].append(res3)
+            if print_message:
+                print(f"SDNN is {round(res3, 2)} msec.")
+            # toc = time.perf_counter()
+            # time_durations.append(toc - tic)
+
+            # tic = time.perf_counter()
+            res3b = self.__sdsd_windowed_short(normalized_differences=self.normalized_differences)
+            res_dict[column_titles[3]].append(res3b)
+            if print_message:
+                print(f"SDSD is {round(res3b, 2)} msec.")
+            # toc = time.perf_counter()
+            # time_durations.append(toc - tic)
+
+            res3c, res3d = self.__sdann_and_sdnni_windowed_short(normalized_differences=self.normalized_differences)
+            res_dict[column_titles[4]].append(res3c)
+            res_dict[column_titles[5]].append(res3d)
+            if print_message:
+                print(f"SDANN is {round(res3c, 2)} msec.")
+                print(f"SDNNI is {round(res3d, 2)} msec.")
+
+            # tic = time.perf_counter()
+            res4 = self.__pnn50_windowed_short(normalized_differences=self.normalized_differences)
+            res_dict[column_titles[6]].append(res4)
+            if print_message:
+                print(f"pNN50 percentage is {round(res4 * 100, 1)}%")
+            # toc = time.perf_counter()
+            # time_durations.append(toc - tic)
+
+            # tic = time.perf_counter()
+            res5 = self.__rmssd_windowed_short(normalized_differences=self.normalized_differences)
+            res_dict[column_titles[7]].append(res5)
+            if print_message:
+                print(f"RMSSD is {round(res5, 2)} msec.")
+            # toc = time.perf_counter()
+            # time_durations.append(toc - tic)
+
+            # tic = time.perf_counter()
+            res7b = self.__hti(normalized_differences=flat_norm_diffs)
+            res_dict[column_titles[8]].append(res7b)
+            if print_message:
+                print(f"HTI is {round(res7b, 3)}")
+            # toc = time.perf_counter()
+            # time_durations.append(toc - tic)
+
+            # tic = time.perf_counter()
+            res8 = self.__hrmaxmin(normalized_differences=flat_norm_diffs)
+            res_dict[column_titles[9]].append(res8)
+            if print_message:
+                print(f"HR max - HR min is {round(res8, 1)} bpm.")
+            # toc = time.perf_counter()
+            # time_durations.append(toc - tic)
+
+            # tic = time.perf_counter()
+            fourier_transform = fft_transform.FFTWindowedTransform(fs=self.fs, data_series=self.current_data)
+            res10a, res10b, res29 = fourier_transform.custom_band(lower_limit=0.04, upper_limit=0.15)
+            res_dict[column_titles[10]].append(res10a)
+            res_dict[column_titles[11]].append(res10b)
+            if print_message:
+                print(f"LF band energy is {res10a}.")
+                print(f"LF band energy is {round(res10b * 100, 2)}% of the full energy.")
+                print(f"LF Energy peak is at {round(res29, 3)} Hz.")
+            res11a, res11b, res30 = fourier_transform.custom_band(lower_limit=0.15, upper_limit=0.401)
+            res_dict[column_titles[12]].append(res11a)
+            res_dict[column_titles[13]].append(res11b)
+            if print_message:
+                print(f"HF band energy is {res11a}.")
+                print(f"HF band energy is {round(res11b * 100, 2)}% of the full energy.")
+                print(f"HF Energy peak is at {round(res30, 3)} Hz.")
+            if res10a > 0:
+                res31 = res10a / res11a
+            else:
+                res31 = 0
+            if print_message:
+                print(f"LF / HF energy is {round(res31, 5)}.")
+            # toc = time.perf_counter()
+            # for _ in range(0, 6):
+            #     time_durations.append((toc - tic) / 6)
+
+            # tic = time.perf_counter()
+            # res12a = 0
+            # res12b = 0
+            # res12c = 0
+            # res12d = 0
+            res12a, res12b, res12c, res12d = self.__poincare_windowed(normalized_differences=self.normalized_differences)
+            res_dict[column_titles[14]].append(res12a)
+            res_dict[column_titles[15]].append(res12b)
+            res_dict[column_titles[16]].append(res12c)
+            res_dict[column_titles[17]].append(res12d)
+            if print_message:
+                print(f"Poincare values - sd1: {round(res12a, 2)} ms, sd2: {round(res12b, 2)} ms, sd ratio:"
+                      f" {round(res12c, 2)}"
+                      f", ellipse area {round(res12d, 2)}, ms^2.")
+            # toc = time.perf_counter()
+            # for _ in range(0, 4):
+            #     time_durations.append((toc - tic) / 4)
+
+            # tic = time.perf_counter()
+            res13a, res13b = self.__approximate_entropy_mean_and_std_windowed(data_array=normalized_current_data,
+                                                                     m=2,
+                                                                     r=0.04, window=5)
+            res_dict[column_titles[18]].append(res13a)
+            res_dict[column_titles[19]].append(res13b)
+            if print_message:
+                print(f"Mean approximate entropy is {round(res13a, 4)}.")
+                print(f"Standard deviation of approximate entropy is {round(res13b, 4)}.")
+            # toc = time.perf_counter()
+            # time_durations.append((toc - tic) / 2)
+            # time_durations.append((toc - tic) / 2)
+
+            # tic = time.perf_counter()
+            res14a, res14b = self.__sample_entropy_mean_and_std_windowed(data_array=normalized_current_data,
+                                                                r=0.04, window=5)
+            res_dict[column_titles[20]].append(res14a)
+            res_dict[column_titles[21]].append(res14b)
+            # toc = time.perf_counter()
+            if print_message:
+                print(f"Mean sample entropy is {round(res14a, 4)}.")
+                print(f"Standard deviation of sample entropy is {round(res14b, 4)}.")
+            # toc = time.perf_counter()
+            # time_durations.append((toc - tic) / 2)
+            # time_durations.append((toc - tic) / 2)
+
+            # time_durations.append((toc - tic) / 2)
+            # time_durations.append((toc - tic) / 2)
+            txt = self.file.split(sep='/')[3]
+            res_dict[column_titles[22]].append(txt)
+            res_dict[column_titles[23]].append(1)
+            res_dict[column_titles[24]].append(res29)
+            res_dict[column_titles[25]].append(res30)
+            res_dict[column_titles[26]].append(res31)
+            # print(res_dict)
+            del res29, txt, res14a, res14b, res13a, res13b, res12a, res12b, res12c, res12d, res31
+            del res30, res11a, res11b, res10a, res10b, res7b, res5, res4, res3b, res2, res, res3c, res3d
+
+            gc.collect()
+            pbar.update(1)
+            # print(normalized_differences)
+            # print(differences)
+        pbar.close()
+        toc = time.perf_counter()
+        print(f"Total extraction time: {round(toc - tic, 3)} sec.")
+        return res_dict
+
+
     def __sdrr(self, differences: list) -> float:
         """Returns the standard deviation of all sinus beats in milliseconds."""
         return statistics.stdev(differences)/self.fs*1000
@@ -519,6 +766,21 @@ class Extraction:
             return statistics.stdev(average_nn), statistics.mean(nn_std)/self.fs*1000
         else:
             return float("nan"), float("nan")
+
+    def __sdann_and_sdnni_windowed_short(self, normalized_differences):
+        """Returns the standard deviation of the average nn duration of 30s intervals, in milliseconds, and
+        the mean of the standard deviation of nn duration of 30s intervals, in milliseconds.
+        Dictionary keys are 'sdann' and 'sdnni'. Suitable for ultra short windowed extraction."""
+        average_nn = []
+        nn_std = []
+        for ultra_short_diffs in normalized_differences:
+            average_nn.append(self.__mean_nn(ultra_short_diffs))
+            nn_std.append(statistics.stdev(ultra_short_diffs))
+        if len(average_nn) > 1 and len(nn_std) > 1:
+            return statistics.stdev(average_nn), statistics.mean(nn_std)/self.fs*1000
+        else:
+            return float("nan"), float("nan")
+
 
     def __normalized_differences(self, differences: list) -> list:
         """Returns the time duration of heartbeats, excluding abnormal beats."""
@@ -603,11 +865,38 @@ class Extraction:
         else:
             return 0
 
+    def __pnn50_windowed_short(self, normalized_differences: list) -> float:
+        """Returns the percentage of adjacent NN intervals that differ from each other by more than 50 ms,
+        suitable for ultra short
+         windowed extraction."""
+        count = 0
+        margin = 50 * self.fs / 1000
+        sz = 0
+        for ultra_short_diff in normalized_differences:
+            sz += len(ultra_short_diff)
+            for i in range(0, len(ultra_short_diff) - 1):
+                if abs(ultra_short_diff[i] - ultra_short_diff[i + 1]) > margin:
+                    count += 1
+        if sz > 1:
+            return count / (sz - 1)
+        else:
+            return 0
+
     def __sdsd(self, normalized_differences: list) -> float:
         """Returns the standard deviation of successive differences of beats in milliseconds"""
         diff = []
         for i in range(0, len(normalized_differences) - 1):
             diff.append(abs(normalized_differences[i] - normalized_differences[i + 1]))
+        diff = diff / self.fs * 1000
+        return statistics.stdev(diff)
+
+    def __sdsd_windowed_short(self, normalized_differences: list) -> float:
+        """Returns the standard deviation of successive differences of beats in milliseconds, suitable for ultra short
+         windowed extraction."""
+        diff = []
+        for ultra_short_diff in normalized_differences:
+            for i in range(0, len(ultra_short_diff) - 1):
+                diff.append(abs(ultra_short_diff[i] - ultra_short_diff[i + 1]))
         diff = diff / self.fs * 1000
         return statistics.stdev(diff)
 
@@ -622,6 +911,25 @@ class Extraction:
         sz = len(normalized_differences_sec)
         if sz > 1:
             return math.sqrt(temp_sum / (sz - 1)) * 1000
+        else:
+            return 0
+
+    def __rmssd_windowed_short(self, normalized_differences):
+        """Returns RMSSD metric, by using nn intervals (computed in milliseconds), suitable for ultra short windowed
+        extraction."""
+        temp_sum = 0
+        temp_count = 0
+        normalized_differences_sec = []
+        for ultra_short_diffs in normalized_differences:
+            normalized_differences_sec.append([])
+            for diff in ultra_short_diffs:
+                normalized_differences_sec[-1].append(diff / self.fs)
+        for ultra_short_diffs in normalized_differences_sec:
+            for i in range(0, len(ultra_short_diffs) - 1):
+                temp_count += 1
+                temp_sum += (ultra_short_diffs[i + 1] - ultra_short_diffs[i]) ** 2
+        if temp_count > 1:
+            return math.sqrt(temp_sum / (temp_count)) * 1000
         else:
             return 0
 
@@ -689,6 +997,27 @@ class Extraction:
             ratio = 0
         return sd1, sd2, ratio, area
 
+    def __poincare_windowed(self, normalized_differences):
+        """Returns poincare metrics, for ultra short windowed analysis, as tuple (sd1, sd2, ratio, area)."""
+        nn = normalized_differences
+        for data in nn:
+            data = data / self.fs * 1000
+        x1_temp = []
+        x2_temp = []
+        for i in range(0, len(nn)):
+            x1_temp.append(np.asarray(nn[i][:-1]))
+            x2_temp.append(np.asarray(nn[i][1:]))
+        x1 = [item for sublist in x1_temp for item in sublist]  # make it flat
+        x2 = [item for sublist in x2_temp for item in sublist]  # make it flat
+        sd1 = np.std(np.subtract(x1, x2) / np.sqrt(2))
+        sd2 = np.std(np.add(x1, x2) / np.sqrt(2))
+        area = np.pi * sd1 * sd2
+        if sd1 > 0:
+            ratio = sd2 / sd1
+        else:
+            ratio = 0
+        return sd1, sd2, ratio, area
+
     def __approximate_entropy_mean_and_std(self, data_array, m, r, window: int) -> tuple:
         """Returns the mean and standard deviation of approximate energy, in a tuple."""
 
@@ -713,6 +1042,38 @@ class Extraction:
             else:
                 # approximate_energy.append(approximate_entropy(data_arr=data_array[i:], m2=m, r1=r))
                 break
+        mn = statistics.mean(approximate_energy)
+        sd = statistics.stdev(approximate_energy)
+        return mn, sd
+
+    def __approximate_entropy_mean_and_std_windowed(self, data_array, m, r, window: int) -> tuple:
+        """Returns the mean and standard deviation of approximate energy, for ultra short windowed analysis,
+        in a tuple."""
+
+        def approximate_entropy(data_arr, m2, r1):
+            data_arr = np.array(data_arr)
+            n = data_arr.shape[0]
+
+            def _phi(m1):
+                z = n - m1 + 1.0
+                x = np.array([data_arr[ii:ii + m1] for ii in range(int(z))])
+                x2 = np.repeat(x[:, np.newaxis], 1, axis=2)
+                c = np.sum(np.absolute(x - x2).max(axis=2) <= r1, axis=0) / z
+                return np.log(c).sum() / z
+
+            return abs(_phi(m2 + 1) - _phi(m2))
+
+        window_samples = int(window * self.fs / self.factor)
+        approximate_energy = []
+
+        for i in range(0, len(data_array)):
+            for j in range(0, len(data_array[i]) - int(window_samples / 2), int(window_samples / 2)):
+                if j+window_samples < len(data_array[i]):
+                    approximate_energy.append(approximate_entropy(data_arr=data_array[i][j:j+window_samples], m2=m,
+                                                                  r1=r))
+                else:
+                    # approximate_energy.append(approximate_entropy(data_arr=data_array[i:], m2=m, r1=r))
+                    break
         mn = statistics.mean(approximate_energy)
         sd = statistics.stdev(approximate_energy)
         return mn, sd
@@ -751,6 +1112,45 @@ class Extraction:
             else:
                 # sample_entropy.append(sampen(data=data_array[i:], r1=r, m=2))
                 break
+        mn = statistics.mean(sample_entropy)
+        sd = statistics.stdev(sample_entropy)
+        return mn, sd
+
+    def __sample_entropy_mean_and_std_windowed(self, data_array, r, window: int):
+        """Returns the mean and standard deviation of sample energy, for ultra short windowed analysis, in a tuple."""
+
+        def sampen(data, m, r1):
+            n = len(data)
+            # b = 0.0
+            # a = 0.0
+
+            # Split time series and save all templates of length m
+            xmi = np.array([data[ii: ii + m] for ii in range(n - m)])
+            xmj = np.array([data[ii: ii + m] for ii in range(n - m + 1)])
+
+            # Save all matches minus the self-match, compute B
+            b = np.sum([np.sum(np.abs(xmii - xmj).max(axis=1) <= r1) - 1 for xmii in xmi])
+
+            # Similar for computing A
+            m += 1
+            xm = np.array([data[ii: ii + m] for ii in range(n - m + 1)])
+
+            a = np.sum([np.sum(np.abs(xmi - xm).max(axis=1) <= r1) - 1 for xmi in xm])
+
+            # Return SampEn
+            del xmi, xmj, xm
+            gc.collect()
+            return -np.log(a / b)
+
+        window_samples = int(window * self.fs / self.factor)
+        sample_entropy = []
+        for i in range(0, len(data_array)):
+            for j in range(0, len(data_array[i]) - int(window_samples / 2), int(window_samples / 2)):
+                if j + window_samples < len(data_array[i]):
+                    sample_entropy.append(sampen(data=data_array[i][j:j + window_samples], r1=r, m=2))
+                else:
+                    # sample_entropy.append(sampen(data=data_array[i:], r1=r, m=2))
+                    break
         mn = statistics.mean(sample_entropy)
         sd = statistics.stdev(sample_entropy)
         return mn, sd

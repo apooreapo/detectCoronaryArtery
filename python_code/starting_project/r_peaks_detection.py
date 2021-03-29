@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from ecgdetectors import Detectors
 import pandas as pd
+import numpy as np
+from pan_tompkins import PanTompkins
 
 
 class PeaksDetection:
@@ -13,8 +15,10 @@ class PeaksDetection:
 
     def detect_peaks(self) -> list:
         """A method to detect R peaks in a pandas data_series."""
-        unfiltered_ecg = self.data_series.to_numpy()
-        detectors = Detectors(self.fs)
+        # unfiltered_ecg = self.data_series.to_numpy()
+        # detectors = Detectors(self.fs)
+        my_pan_tompkins = PanTompkins(fs=self.fs, data_series=self.data_series, print_message=False)
+        r_peaks = my_pan_tompkins.pan_tompkins()
 
         # choose between available r peaks detectors
         # r_peaks = detectors.two_average_detector(unfiltered_ecg)
@@ -23,7 +27,7 @@ class PeaksDetection:
         # r_peaks = detectors.engzee_detector(unfiltered_ecg)
         # r_peaks = detectors.christov_detector(unfiltered_ecg)
         # r_peaks = detectors.hamilton_detector(unfiltered_ecg)
-        r_peaks = detectors.pan_tompkins_detector(unfiltered_ecg)
+        # r_peaks = detectors.pan_tompkins_detector(unfiltered_ecg)
 
         # uncomment below to plot the result
         # plt.figure()
