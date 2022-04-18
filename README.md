@@ -1,4 +1,4 @@
-# diplomaThesis
+# Detect Coronary Artery
 
-In this repository you can view the files regarding my diploma thesis research. If you want to,
-feel free to experiment with them.
+In this repository you can view the demos and the research regarding our algorithm on detecting coronary artery, using ultra short ECG recordings.
+
